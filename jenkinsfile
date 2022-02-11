@@ -1,0 +1,31 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('ContinuousDownload')
+        {
+            steps
+            {
+                git branch: 'my_specific_branch',
+                credentialsId: 'my_cred_id',
+                url: 'ssh://git@test.com/proj/test_proj.git'
+
+            }
+        }
+        stage('ContinuousBuild')
+        {
+            steps
+            {
+              sh label: '', script: 'mvn package'
+            }
+                
+        }
+        stage('ContinuousDeployment')
+        {
+            steps
+            {
+                sh label: '', script: 'scp *.war user@ip:/var/lib/tomcat8/webapps/app.war'
+            }
+            
+        }
