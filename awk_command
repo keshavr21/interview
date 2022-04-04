@@ -1,0 +1,1 @@
+awk '/.vnic.oc/{ if ($7 != "" ) print "vnic\n{\"vnicId\":\"" $7 ",\"resourceId\":\"" $4 ",\"resourceType\":\"database\"}"; if  ($9 != "") print "vnic\n{\"vnicId\":\"" $9 ",\"resourceId\":\"" $4 ",\"resourceType\":\"database\"" }' data.txt
