@@ -1,0 +1,56 @@
+pipeline 
+{
+    agent any
+    tools
+    {
+        jdk 'jdk11'
+        maven 'maven3'
+    }
+    environment
+    {
+        SCANNER_HOME= tool 'sonar'
+    }
+    stages {
+        stage('checkout') 
+        {
+            steps 
+            {
+                git branch: 'main', changelog: false, poll: false, url: 'https://github.com/jaiswaladi246/Shopping-Cart.git'
+            }
+        }
+        stage('compile') 
+        {
+            steps 
+            {
+                sh "mvn clean package -DskipTests=true"
+            }
+        }
+        stage('OWASPScan') 
+        {
+            steps 
+            {
+                dependencyCheck additionalArguments: '--scan ./ ', odcInstallation: 'DP'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+        stage('Sonarqube') 
+        {
+            steps 
+            {
+                withSonarQubeEnv('sonar-server')
+                {
+                   sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Shopping-Cart \
+                   -Dsonar.java.binaries=. \
+                   -Dsonar.projectKey=Shopping-Cart '''
+               }
+            }
+        }
+        stage('nexusupload') 
+        {
+            steps 
+            {
+                nexusArtifactUploader artifacts: [[artifactId: 'maven-web', classifier: '', file: 'target/shopping-cart-0.0.1-SNAPSHOT.jar', type: 'jar']], credentialsId: '05d1fc18-d6ac-43d4-81f1-9f1441550c27', groupId: 'shopping-cart', nexusUrl: '172.31.40.217:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'maven-web', version: '${BUILD_NUMBER}'
+            }
+        }
+    }
+}
