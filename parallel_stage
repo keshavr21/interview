@@ -1,0 +1,45 @@
+pipeline
+{
+    agent none 
+    stages
+    {
+        stage('Parallel Stage')
+        {
+            parallel 
+            {
+                stage('Stage A')
+                {
+                    agent { label 'agent1' }
+                    steps
+                    {
+                        echo 'Running Stage A'
+                    }
+                }
+                stage('Stage B')
+                {
+                    agent { label 'agent2'}
+                    steps
+                    {
+                        echo 'Running Stage B'
+                    }
+                }
+                stage('Stage C')
+                {
+                    agent { label 'agent3'}
+                    steps
+                    {
+                        echo 'Running Stage C'
+                    }
+                }
+
+            }
+        }
+        stage('FINAL STAGE')
+        {
+            steps 
+            {
+                echo 'This is the Final stage'
+            }
+        }
+    }
+}
