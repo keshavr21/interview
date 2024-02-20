@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Run Script') {
+            steps {
+                script {
+                    def scriptOutput = sh(script: '/home/jenkins/workarea/bash/listRegions.sh', returnStdout: true).trim()
+                    env.SCRIPT_OUTPUT = scriptOutput
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                currentBuild.result = currentBuild.result ?: 'SUCCESS'
+                def status = currentBuild.result
+                def slackColor = status == 'SUCCESS' ? 'good' : 'danger'
+                def slackMsg = "Build ${status}: ${env.JOB_NAME} ${env.BUILD_NUMBER} - Console Output: ${env.BUILD_URL}console\n\n${env.SCRIPT_OUTPUT}"
+
+                slackSend(color: slackColor, message: slackMsg)
+            }
+        }
+    }
+}
